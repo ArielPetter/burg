@@ -12,4 +12,7 @@ module.exports = {
     underscored: true,
     underscoredAll: true,
   },
+  pool: {
+    max: 5, // Define apenas o número máximo de conexões
+  },
 };
