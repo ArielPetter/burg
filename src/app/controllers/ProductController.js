@@ -1,12 +1,13 @@
 import * as Yup from 'Yup';
 import Product from '../models/Product';
+import Category from '../models/Category';
 
 class ProductController {
   async store(request, response) {
     const schema = Yup.object({
       name: Yup.string().required(),
       price: Yup.number().required(),
-      category: Yup.string().required(),
+      category_id: Yup.number().required(),
     });
 
     try {
@@ -16,12 +17,20 @@ class ProductController {
     }
 
     const { filename: path } = request.file; //QUANDO DESESTRUTURANDO PODE-SE USAR ":" E RENOMEAR A PROPRIEDADE por ex. filename para path
-    const { name, price, category } = request.body;
+    const { name, price, category_id } = request.body;
+
+    const foundCategory = await Category.findOne({
+      where: { id: category_id },
+    });
+
+    if (!foundCategory) {
+      return response.status(400).json({ error: 'Categoria não encontrada' });
+    }
 
     const product = await Product.create({
       name,
       price,
-      category,
+      category_id: foundCategory.id,
       path,
     });
 
@@ -29,7 +38,15 @@ class ProductController {
   }
 
   async index(request, response) {
-    const products = await Product.findAll();
+    const products = await Product.findAll({
+      include: [
+        {
+          model: Category,
+          as: 'category',
+          attributes: ['id', 'name'],
+        },
+      ],
+    });
     return response.json(products);
   }
 }
