@@ -1,14 +1,16 @@
-import mangoose from 'mangoose';
+import mongoose from 'mongoose';
 
-const OrderSchema = new mangoose.Schema(
+const OrderSchema = new mongoose.Schema(
   {
     user: {
-      type: String,
-      required: true,
-    },
-    name: {
-      type: String,
-      required: true,
+      id: {
+        type: String,
+        required: true,
+      },
+      name: {
+        type: String,
+        required: true,
+      },
     },
     products: [
       {
@@ -33,7 +35,7 @@ const OrderSchema = new mangoose.Schema(
           required: true,
         },
         quantity: {
-          type: Number,
+          type: String,
           required: true,
         },
       },
@@ -48,4 +50,4 @@ const OrderSchema = new mangoose.Schema(
   },
 );
 
-export default mongoose.model('Orders', OrderSchema);
+export default mongoose.model('Order', OrderSchema);

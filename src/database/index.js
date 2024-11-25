@@ -26,7 +26,7 @@ class Database {
 
   mongo() {
     this.mongoConnection = mongoose.connect(
-      'mongodb://localhost27017/devburguer', //conexão com banco mongo
+      'mongodb://localhost:27017/devburguer', //conexão com banco mongo
     );
   }
 }

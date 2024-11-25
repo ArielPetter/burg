@@ -1,6 +1,7 @@
 import * as Yup from 'Yup';
 import Product from '../models/Product';
 import Category from '../models/Category';
+import User from '../models/User';
 
 class ProductController {
   async store(request, response) {
@@ -8,6 +9,7 @@ class ProductController {
       name: Yup.string().required(),
       price: Yup.number().required(),
       category_id: Yup.number().required(),
+      offer: Yup.boolean(),
     });
 
     try {
@@ -16,15 +18,21 @@ class ProductController {
       return response.status(400).json({ error: err.errors });
     }
 
+    const { admin: isAdmin } = await User.findByPk(request.userId);
+
+    if (!isAdmin) {
+      return response.status(401).json();
+    }
+
     const { filename: path } = request.file; //QUANDO DESESTRUTURANDO PODE-SE USAR ":" E RENOMEAR A PROPRIEDADE por ex. filename para path
-    const { name, price, category_id } = request.body;
+    const { name, price, category_id, offer } = request.body;
 
     const foundCategory = await Category.findOne({
       where: { id: category_id },
     });
 
     if (!foundCategory) {
-      return response.status(400).json({ error: 'Categoria não encontrada' });
+      return response.status(400).json({ error: 'Category not found' });
     }
 
     const product = await Product.create({
@@ -32,9 +40,73 @@ class ProductController {
       price,
       category_id: foundCategory.id,
       path,
+      offer,
     });
 
-    return response.status(201).json({ message: 'Ok' });
+    return response.status(201).json(product);
+  }
+
+  async update(request, response) {
+    const schema = Yup.object({
+      name: Yup.string(),
+      price: Yup.number(),
+      category_id: Yup.number(),
+      offer: Yup.boolean(),
+    });
+
+    try {
+      schema.validateSync(request.body, { abortEarly: false });
+    } catch (err) {
+      return response.status(400).json({ error: err.errors });
+    }
+
+    const { admin: isAdmin } = await User.findByPk(request.userId);
+
+    if (!isAdmin) {
+      return response.status(401).json();
+    }
+
+    const { id } = request.params;
+
+    const findProduct = await Product.findByPk(id);
+
+    if (!findProduct) {
+      return response
+        .status(400)
+        .json({ error: 'Make sure your product ID is correct' });
+    }
+
+    let path;
+    if (request.file) {
+      path = request.file.filename;
+    }
+
+    const { name, price, category_id, offer } = request.body;
+
+    // const foundCategory = await Category.findOne({
+    //   where: { id: category_id },
+    // });
+
+    // if (!foundCategory) {
+    //   return response.status(400).json({ error: 'Category not found' });
+    // }
+
+    await Product.update(
+      {
+        name,
+        price,
+        category_id,
+        path,
+        offer,
+      },
+      {
+        where: {
+          id,
+        },
+      },
+    );
+
+    return response.status(200).json();
   }
 
   async index(request, response) {
