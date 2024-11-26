@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+
 import authConfig from '../../config/auth';
 
 function authMiddleware(request, response, next) {
