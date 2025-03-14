@@ -83,14 +83,6 @@ class ProductController {
 
     const { name, price, category_id, offer } = request.body;
 
-    // const foundCategory = await Category.findOne({
-    //   where: { id: category_id },
-    // });
-
-    // if (!foundCategory) {
-    //   return response.status(400).json({ error: 'Category not found' });
-    // }
-
     await Product.update(
       {
         name,
